@@ -1,0 +1,29 @@
+{
+    "mensajes": {
+        "msg1": {
+            "orden":1,
+            "mensajes": "pepe loco",
+            "autor": "Murciano"
+        },
+        "msg2": {
+            "orden":2,
+            "mensajes": "pepe culo",
+            "autor": "Murciano"
+        },
+        "msg3": {
+            "orden":3,
+            "mensajes": "pepe loco",
+            "autor": "Murciano"
+        },
+        "msg4": {
+            "orden":4,
+            "mensajes": "pepe loc 54+54o",
+            "autor": "Murciano"
+        },
+        "msg5": {
+            "orden":5,
+            "mensajes": "pepe loco 5",
+            "autor": "Murciano"
+        }
+    }
+}

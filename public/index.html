@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=100, initial-scale=1.0">
+    <title>Proyectito humilde</title>
+
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-pprn3073KE6tl6bjs2QrFaJGz5/SUsLqktiwsUTF55Jfv3qYSDhgCecCxMW52nD2" crossorigin="anonymous"></script>
+
+    <!-- FONTS -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@200;500&display=swap" rel="stylesheet">
+
+</head>
+<body>
+  <div class="container">
+    <div class="row mt-4">
+      <div class="col">
+        <h1 id="titulo">¡El chat de Papá Lucho!</h1>
+        <p id="descripcion">Vamos a aclarar los tantos</p>
+        <ul id="chat" class="list-group wrapper-chat"></ul>
+        <div id="chatAction" class="chatAction"  style="display: none;">
+          <div class="row mt-4">
+            <div id="fotoUsuario" class="col-md-3">
+            </div>
+            <div class="col-12 col-md-9">
+              <input type="text" readonly class="form-control-plaintext" id="nombreUsuario" value="" >
+              <label for="mensaje" class="col-sm-2 col-form-label">Mensaje:</label>
+              <input type="text" class="form-control" id="mensaje" />
+              <div class="row ">
+                <div class="col-12 col-md-6  mt-2">
+                  <button type="button" id="pp" class="btn btn-danger" >Enviar</button>
+                </div>
+                <div class="col-12 col-md-6  mt-2">
+                  <button type="button" id="salir" class="btn btn-danger" >Salir</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div id="logInGoogle" class="login">
+          <button id="login">
+            <img src="/public/sign_in_google.png" alt="Sign in with Google" class="signInGoogle">
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.8.2/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.8.2/firebase-analytics.js";
+        import { getDatabase, 
+            ref, 
+            onValue, 
+            onChildAdded, 
+            onChildChanged,
+            onChildRemoved, 
+            query,
+            orderByChild,
+            limitToFirst,
+            set,
+            push,
+        } 
+        from "https://www.gstatic.com/firebasejs/9.8.2/firebase-database.js";
+        import { getAuth,signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.8.2/firebase-auth.js";
+        // TODO: Add SDKs for Firebase products that you want to use
+        // https://firebase.google.com/docs/web/setup#available-libraries
+      
+        // Your web app's Firebase configuration
+        // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+        const firebaseConfig = {
+          apiKey: "AIzaSyDpEnqPlJYQKFjSafhQvJhA5Y-I3CbDoQ4",
+          authDomain: "proyectitohumilde.firebaseapp.com",
+          projectId: "proyectitohumilde",
+          storageBucket: "proyectitohumilde.appspot.com",
+          messagingSenderId: "279868424065",
+          appId: "1:279868424065:web:fe4c720daad03b1fca3280",
+          measurementId: "G-SYSESBQ673"
+        };
+      
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+        const db = getDatabase(); //Instancio DB
+        // Referencias
+        //const refTextos = ref(db, "textos/"); //Referencia a DB aclarando cual DB es y el nodo correspondiente
+        const refMensajes = ref(db, "mensajes/"); //Referencia a DB aclarando cual DB es y el nodo correspondiente
+        // Querys
+        const queryMSGbyChild = query(refMensajes, orderByChild('fecha/'));
+        const queryLimitToFirst = query(refMensajes, limitToFirst(2));
+
+
+
+        let titulo = document.getElementById("titulo");
+        let descripcion = document.getElementById("descripcion");
+        let chat = document.getElementById("chat");
+        let fotoUsuario = document.getElementById("fotoUsuario");
+        let nombreUsuario = document.getElementById("nombreUsuario");
+        let chatAction = document.getElementById("chatAction");
+        let logInGoogle = document.getElementById("logInGoogle");
+        let nombre = document.getElementById("nombre");
+        let mensaje = document.getElementById("mensaje");
+        let pp = document.getElementById("pp").addEventListener('click', ()=> {
+            traemeData();
+        })
+        let datax = [];
+        /*onValue(refTextos, (snap)=> {
+                let data = snap.val();
+                console.log("onValue:", data);
+                titulo.innerHTML = data.autor;
+                descripcion.innerHTML = data.descripcion;
+                load.style.display = "none";
+                datax = data;
+        }); //Busca datos a una referencia. Aparece siempre que se modifica la DB
+        onChildAdded( refTextos, (snap)=>{
+            let data = snap.val();
+            console.log("onChildAdded:", data);
+        }); // Muestra todos los datos separados. Aparece solo cuando se agrega algún dato
+        onChildChanged( refTextos, (snap)=>{
+            let data = snap.val();
+            let key = snap.key;
+            console.log("onChildChanged:", data, "key:", key);
+        }); // Muestra todos los datos separados. Aparece solo cuando se modifica algún dato
+        onChildRemoved( refTextos, (snap)=>{
+            let data = snap.val();
+            let key = snap.key;
+            console.log("onChildRemoved:", data, "key:", key);
+        }); // Muestra todos los datos separados. Aparece solo cuando se borra algún dato
+
+        onChildAdded(refMensajes, (snap) => {
+            load.style.display = "none";
+            let data = snap.val();
+            console.log("onChildAdded / refMensajes:", data);
+        }) //Arroja los objetos
+*/
+        onChildAdded(queryMSGbyChild, (snap)=> {
+            let data = snap.val();
+            let key = snap.key;
+            agregarMSG(data);
+            
+        });
+
+        const agregarMSG = (msg) => {           
+          let li = document.createElement('li');
+          let img = document.createElement('img');  
+          li.classList.add("list-group-item");
+          img.classList.add("itemImg");
+          img.src = `${msg.foto}`; //aca hay un error
+          let txt = document.createTextNode(msg.autor + ": " + msg.mensajes);
+          li.appendChild(txt);
+          li.appendChild(img);
+          li.setAttribute("id", msg.fecha)
+          chat.appendChild(li);
+          document.getElementById(msg.fecha).scrollIntoView( {block: "end", behavior: "smooth"} ); // Scrollea al ultimo mensaje
+        }
+
+        let clicks = document.addEventListener("keyup", function (event) {
+          if (event.keyCode === 13) {
+            event.preventDefault();
+            document.getElementById("pp").click();  // Cuando aprete enter haga click en el boton que tenia
+          }
+        });
+
+        const traemeData = () => {
+          var fecha = Date.now();
+
+          let msg = {
+            autor: nombreUsuario.value,
+            mensajes: mensaje.value,
+            foto: fotoUsuario.value,
+            fecha: fecha,
+          };
+
+          if(mensaje.value != "") {
+            push(refMensajes, msg );
+            mensaje.value = "";
+          }else {
+            alert("Completa los campos papu/mamu");
+          }
+          //set(refMensajes, { msg }) // Que seteamos, y la referencia. Borra todo lo anterior
+        }
+
+        //Sign In
+        const auth = getAuth();
+        let login = document.getElementById("login").addEventListener('click', () => {
+          loguearUsuario();
+        })
+
+        let loguearUsuario = () => {
+          auth.languageCode = "es"; //Idioma del pop up
+          const provider = new GoogleAuthProvider();
+          signInWithPopup(auth, provider).then((result)=>{
+            let logUser = {
+              uid: result.user.uid,
+              username: result.user.displayName,
+              profile_picture: result.user.photoURL,
+              email: result.user.email,
+            };
+
+            fotoUsuario.value = result.user.photoURL;
+            nombreUsuario.value = result.user.displayName; // Envio el display name al usuario
+            chatAction.style.display = "block";
+            logInGoogle.style.display = "none";
+            console.log("logueado: ", logUser )
+            Swal.fire({
+              title: 'Bienvenido/a ' + result.user.displayName,
+              showConfirmButton: false,
+              timer: 2500
+            })
+          });
+        }
+
+        onAuthStateChanged(auth, (user) => {
+          if(user){
+            fotoUsuario.value = user.photoURL;
+            nombreUsuario.value = user.displayName; // Envio el display name al usuario
+            fotoUsuario.innerHTML = `<img src="${user.photoURL}"" alt="${user.displayName}" class="fotoUsuario">`
+            chatAction.style.display = "block";
+            logInGoogle.style.display = "none";
+          }else{
+            null;
+          }
+        })
+
+
+
+
+
+
+
+
+
+
+
+        //Log out
+      const logOut = () => {
+        signOut(auth).then(()=>{
+          nombreUsuario.value = "";
+          chatAction.style.display = "none";
+          logInGoogle.style.display = "block";
+          console.log("deslogueado")
+        })
+      };
+
+      let salir = document.getElementById("salir").addEventListener('click', ()=>{
+        Swal.fire({
+          title: '¿Seguro desea salir?',
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonColor: '#3085d6',
+          cancelButtonColor: '#d33',
+          confirmButtonText: 'Salir',
+          cancelButtonText: 'Cancelar'
+        }).then((result) => {
+          if (result.isConfirmed) {
+            logOut();
+          }
+        })
+
+      })
+
+      </script>
+      <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</body>
+</html>

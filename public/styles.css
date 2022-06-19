@@ -1,0 +1,49 @@
+.col H1, p{
+    font-family: 'Montserrat', sans-serif;
+    display:flex;
+    justify-content: center;
+    align-items: center;
+}
+
+p{
+    font-family: 'Montserrat', sans-serif;
+}
+
+.wrapper-chat{
+    height: 50vh;
+    overflow: scroll;
+    overflow-x: unset;
+}
+
+#logInGoogle{
+    display:flex;
+    justify-content: center;
+    align-items: center;
+}
+.signInGoogle{
+    width: 200px;
+}
+
+.fotoUsuario{
+    border-style: solid;
+    border-radius: 50%;
+    border-color:  black;
+}
+
+#fotoUsuario{
+    display:flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.itemImg{
+    border-radius: 50%;
+    width: 2%;
+    float: right;
+}
+
+@media(max-width:900px){
+    .itemImg{
+        width: 5%;
+    }
+}

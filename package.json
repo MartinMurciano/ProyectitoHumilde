@@ -1,0 +1,17 @@
+{
+  "name": "proyectitohumilde",
+  "version": "1.0.0",
+  "description": "First web with firebase",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "firebase"
+  ],
+  "author": "Martin",
+  "license": "MIT",
+  "dependencies": {
+    "firebase": "^9.8.2"
+  }
+}
